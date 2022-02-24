@@ -1,14 +1,15 @@
-import os
-import json
 import logging
-import numpy as np
+import os
+
 from PIL import Image
+from flask import Flask, request, jsonify
+
 from Yolov5.inference import run_inference
-from flask import Flask, request, jsonify, abort
 
 app = Flask(__name__)
 app.logger.setLevel(logging.DEBUG)
 target_id = ""
+
 
 @app.route("/health_check", methods=['GET', 'POST'])
 def healthCheck():
