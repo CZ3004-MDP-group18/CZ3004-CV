@@ -29,13 +29,15 @@ def test_method():
             pil_image = Image.open(photo)
             # Run inference.py here. Returns output ID.
             target_id = str(run_inference(pil_image))
+            if target_id == '99':
+                target_id = ""
             print(type(target_id))
             print("from server", target_id)
     return target_id
 
 
 def run_server_api():
-    app.run(host='192.168.3.8', port=3001)
+    app.run(host='192.168.3.13', port=4000)
 
 
 if __name__ == "__main__":
