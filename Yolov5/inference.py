@@ -10,6 +10,7 @@ import subprocess
 from PIL import Image
 import glob
 import pandas
+import numpy as np
 
 # dictionary of image IDs. Keys are IDs, values are bounding box labels
 image_ids = {'square' : 0,
@@ -69,32 +70,79 @@ def run_inference(image):
     classes = result_df['name'].values.tolist()
     if len(classes) == 0:
         output_id = 99
+        return [99,0]
     elif len(classes) >= 2:
         max_confidence = max(result_df['confidence'].values.tolist())
+        if max_confidence >= 0.8:
+            class_name = classes[0]
+            output_id = image_ids['%s' % class_name]
+        else:
+            output_id = 99
         max_class = result_df.loc[result_df['confidence'] == max_confidence, 'name'].iloc[0]
         output_id = image_ids['%s' % max_class]
     elif len(classes) == 1:
-        class_name = classes
-        output_id = image_ids['%s' % class_name]
+        max_confidence = max(result_df['confidence'].values.tolist())
+        print("max confidence", max_confidence)
+        if max_confidence >= 0.8:
+            class_name = classes[0]
+            output_id = image_ids['%s' % class_name]
+        else:
+            output_id = 99
     print("from inference", output_id)
     result.save()
-    return output_id
+
+    # get output distance
+    ymax = result_df['ymax'][0]
+    ymin = result_df['ymin'][0]
+    angle = 9
+    distance = calculate_distance(ymin, ymax, angle)
+
+    outputs = [output_id, distance]
+    return outputs
+
+def calculate_distance(ymin, ymax, angle):
+    oppcm = ((ymax - ymin) * 0.0264583)/2
+    while True:
+        if oppcm >= 0:
+            angle = oppcm*(np.log(np.power(10,(oppcm*0.58))))
+        return (oppcm/np.tan(angle*0.0175))
 
 # --- For Testing ---
-# for i in input_images:
-#     # try 'ultralytics/yolov5' as 1st argument if cannot run
-#     result = model(i)
-#     result.print()
-#     result_df = result.pandas().xyxy[0]
-#     classes = result_df['name'].values.tolist()
-#     if len(classes) == 0:
-#         output_id = 99
-#     elif len(classes) >= 2:
-#         max_confidence = max(result_df['confidence'].values.tolist())
-#         max_class = result_df.loc[result_df['confidence'] == max_confidence, 'name'].iloc[0]
-#         output_id = image_ids['%s' % max_class]
-#     elif len(classes) == 1:
-#         class_name = classes[0]
-#         output_id = image_ids['%s' % class_name]
-#
-#     print(output_id)
+for i in input_images:
+    # try 'ultralytics/yolov5' as 1st argument if cannot run
+    result = model(i)
+    result.print()
+    result_df = result.pandas().xyxy[0]
+    print(result_df)
+    classes = result_df['name'].values.tolist()
+    if len(classes) == 0:
+        output_id = 99
+    elif len(classes) >= 2:
+        max_confidence = max(result_df['confidence'].values.tolist())
+        print("max confidence", max_confidence)
+        if max_confidence >= 0.8:
+            class_name = classes[0]
+            output_id = image_ids['%s' % class_name]
+        else:
+            output_id = 99
+            pass
+        max_class = result_df.loc[result_df['confidence'] == max_confidence, 'name'].iloc[0]
+        output_id = image_ids['%s' % max_class]
+    elif len(classes) == 1:
+        max_confidence = max(result_df['confidence'].values.tolist())
+        print("max confidence", max_confidence)
+        if max_confidence >= 0.8:
+            class_name = classes[0]
+            output_id = image_ids['%s' % class_name]
+        else:
+            output_id = 99
+
+
+    ymax = result_df['ymax'][0]
+    ymin = result_df['ymin'][0]
+    angle = 9
+    height = ymax - ymin
+    print("height", (height* 0.0264583))
+    distance = calculate_distance(ymin, ymax, angle)
+    outputs = (output_id, distance)
+    print(outputs)

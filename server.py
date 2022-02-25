@@ -8,7 +8,8 @@ from Yolov5.inference import run_inference
 
 app = Flask(__name__)
 app.logger.setLevel(logging.DEBUG)
-target_id = ""
+target_id = ''
+distance = ''
 
 
 @app.route("/health_check", methods=['GET', 'POST'])
@@ -18,6 +19,7 @@ def healthCheck():
 
 @app.route("/obstacle", methods=['POST'])
 def test_method():
+    global distance
     global target_id
     # print(request.json)
     # data from the connection
@@ -28,12 +30,16 @@ def test_method():
             # process your img_arr here
             pil_image = Image.open(photo)
             # Run inference.py here. Returns output ID.
-            target_id = str(run_inference(pil_image))
+            outputs = run_inference(pil_image)
+            target_id = str(outputs[0])
+            distance = str(outputs[1])
             if target_id == '99':
                 target_id = ""
-            print(type(target_id))
-            print("from server", target_id)
-    return target_id
+
+    output = target_id +","+distance
+    print(type(output))
+    print("from server", output)
+    return output
 
 
 def run_server_api():
