@@ -57,8 +57,9 @@ for filename in glob.glob('captured/*.jpg'): #assuming jpg
     im=Image.open(filename)
     input_images.append(im)
 
-model = torch.hub.load('ultralytics/yolov5', 'custom',
-                        r'detection/yolov5/models/best_14feb.pt', force_reload=True)
+model = torch.hub.load(r"C:\Users\okapu\Desktop\1Uni\AY2021-22 Sem 2\3004 MDP\CZ3004-CV\pretrained\ultralytics_yolov5_master", 'custom',
+                        r'C:\Users\okapu\Desktop\1Uni\AY2021-22 Sem 2\3004 MDP\CZ3004-CV\Yolov5\detection\yolov5\models\best_14feb.pt', source="local")
+
 
 def run_inference(image):
     # try 'ultralytics/yolov5' as 1st argument if cannot run
