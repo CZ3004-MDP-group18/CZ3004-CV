@@ -54,15 +54,20 @@ image_ids = {'square' : 0,
 
 # retrieve images from captured. Only for testing
 input_images = []
-for filename in glob.glob('captured/*.jpg'): #assuming jpg
+for filename in glob.glob('captured/*.jpeg'): #assuming jpg
     im=Image.open(filename)
     input_images.append(im)
 
 model = torch.hub.load(r"C:\Users\okapu\Desktop\1Uni\AY2021-22 Sem 2\3004 MDP\CZ3004-CV\pretrained\ultralytics_yolov5_master", 'custom',
                         r'C:\Users\okapu\Desktop\1Uni\AY2021-22 Sem 2\3004 MDP\CZ3004-CV\Yolov5\detection\yolov5\models\best_14feb.pt', source="local")
 
+# output ID meanings
+# 0 - bullseye
+# 99 - blank
+# others refer to target_ID of character images
 
-def run_inference(image):
+# pass in 2 parameters - image + run directory
+def run_inference(image, run_directory):
     # try 'ultralytics/yolov5' as 1st argument if cannot run
     result = model(image)
     result.print()
@@ -73,23 +78,32 @@ def run_inference(image):
         return [99,0]
     elif len(classes) >= 2:
         max_confidence = max(result_df['confidence'].values.tolist())
+        print("max confidence", max_confidence)
         if max_confidence >= 0.8:
-            class_name = classes[0]
-            output_id = image_ids['%s' % class_name]
+            # class_name = classes[0]
+            # print("class_name",class_name)
+            # print("classes", classes)
+            # print("result df", result_df)
+            # output_id = image_ids['%s' % class_name]
+            max_class = result_df.loc[result_df['confidence'] == max_confidence, 'name'].iloc[0]
+            print("max class",max_class)
+            output_id = image_ids['%s' % max_class]
+            # only save results that have non-blank/non-bullseye class ID
+            result.save(save_dir=run_directory)
         else:
             output_id = 99
-        max_class = result_df.loc[result_df['confidence'] == max_confidence, 'name'].iloc[0]
-        output_id = image_ids['%s' % max_class]
     elif len(classes) == 1:
         max_confidence = max(result_df['confidence'].values.tolist())
         print("max confidence", max_confidence)
         if max_confidence >= 0.8:
             class_name = classes[0]
             output_id = image_ids['%s' % class_name]
+            # only save results that have non-blank/non-bullseye class ID
+            result.save(save_dir=run_directory)
         else:
             output_id = 99
     print("from inference", output_id)
-    result.save()
+    # result.save() # only save results that have non-blank/non-bullseye class ID
 
     # get output distance
     ymax = result_df['ymax'][0]
@@ -107,42 +121,5 @@ def calculate_distance(ymin, ymax, angle):
             angle = oppcm*(np.log(np.power(10,(oppcm*0.58))))
         return (oppcm/np.tan(angle*0.0175))
 
-# --- For Testing ---
-for i in input_images:
-    # try 'ultralytics/yolov5' as 1st argument if cannot run
-    result = model(i)
-    result.print()
-    result_df = result.pandas().xyxy[0]
-    print(result_df)
-    classes = result_df['name'].values.tolist()
-    if len(classes) == 0:
-        output_id = 99
-    elif len(classes) >= 2:
-        max_confidence = max(result_df['confidence'].values.tolist())
-        print("max confidence", max_confidence)
-        if max_confidence >= 0.8:
-            class_name = classes[0]
-            output_id = image_ids['%s' % class_name]
-        else:
-            output_id = 99
-            pass
-        max_class = result_df.loc[result_df['confidence'] == max_confidence, 'name'].iloc[0]
-        output_id = image_ids['%s' % max_class]
-    elif len(classes) == 1:
-        max_confidence = max(result_df['confidence'].values.tolist())
-        print("max confidence", max_confidence)
-        if max_confidence >= 0.8:
-            class_name = classes[0]
-            output_id = image_ids['%s' % class_name]
-        else:
-            output_id = 99
-
-
-    ymax = result_df['ymax'][0]
-    ymin = result_df['ymin'][0]
-    angle = 9
-    height = ymax - ymin
-    print("height", (height* 0.0264583))
-    distance = calculate_distance(ymin, ymax, angle)
-    outputs = (output_id, distance)
-    print(outputs)
+# --- For Testing --- Saved images go to runs in same directory as this file
+# run_inference(input_images[0])

@@ -1,4 +1,5 @@
 # YOLOv5 🚀 by Ultralytics, GPL-3.0 license
+print("common.py (yolov5) has run")
 """
 Common modules
 """
