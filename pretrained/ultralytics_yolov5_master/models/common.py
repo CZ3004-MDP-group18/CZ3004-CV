@@ -530,6 +530,7 @@ class AutoShape(nn.Module):
         shape0, shape1, files = [], [], []  # image and inference shapes, filenames
         for i, im in enumerate(imgs):
             f = f'image{i}'  # filename
+            print("common.py. Autoshape class. f is", f)
             if isinstance(im, (str, Path)):  # filename or uri
                 im, f = Image.open(requests.get(im, stream=True).raw if str(im).startswith('http') else im), im
                 im = np.asarray(exif_transpose(im))
@@ -588,6 +589,8 @@ class Detections:
     # added new parameter best_class
     def display(self, best_class, pprint=False, show=False, save=False, crop=False, render=False, save_dir=Path('')):
         crops = []
+        print("self.files are", self.files)
+        print("saving directory is", save_dir)
         for i, (im, pred) in enumerate(zip(self.imgs, self.pred)):
             s = f'image {i + 1}/{len(self.pred)}: {im.shape[0]}x{im.shape[1]} '  # string
             if pred.shape[0]:
@@ -620,8 +623,16 @@ class Detections:
             if show:
                 im.show(self.files[i])  # show
             if save:
-                f = self.files[i]
+                directory_files = [name for name in os.listdir(save_dir)]
+                num_captured_images = len(directory_files)
+                #f = self.files[i]
+                i = 0
+                f = str(i) + '.jpg'
+                while (f in directory_files):
+                    i += 1
+                    f = str(i) + '.jpg'
                 im.save(save_dir / f)  # save
+                print("saved to", (save_dir / f))
                 if i == self.n - 1:
                     LOGGER.info(f"Saved {self.n} image{'s' * (self.n > 1)} to {colorstr('bold', save_dir)}")
             if render:

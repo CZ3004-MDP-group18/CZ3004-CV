@@ -54,7 +54,7 @@ image_ids = {'square' : 0,
 
 # retrieve images from captured. Only for testing
 input_images = []
-for filename in glob.glob('captured/*.jpg'): #assuming jpg
+for filename in glob.glob('captured/*.jpeg'): #assuming jpg
     im=Image.open(filename)
     input_images.append(im)
 
@@ -72,7 +72,10 @@ def run_inference(image, run_directory):
     result = model(image)
     #result.print()
     result_df = result.pandas().xyxy[0]
+    result_df = result_df.sort_values(by=['confidence'], ascending=False).reset_index(drop=True)
+    print(result_df)
     classes = result_df['name'].values.tolist()
+
     if len(classes) == 0:
         output_id = 99
         return [99,0]
@@ -80,19 +83,55 @@ def run_inference(image, run_directory):
         max_confidence = max(result_df['confidence'].values.tolist())
         print("max confidence", max_confidence)
         if max_confidence >= 0.8:
-            # class_name = classes[0]
-            # print("class_name",class_name)
-            # print("classes", classes)
-            # print("result df", result_df)
-            # output_id = image_ids['%s' % class_name]
             max_class = result_df.loc[result_df['confidence'] == max_confidence, 'name'].iloc[0]
             print("max class",max_class)
+            """
+            # get distances of each class identified
+            distances = []
+            for i in range(len(classes)):
+                row_ymax = result_df['ymax'][i]
+                row_ymin = result_df['ymin'][i]
+                angle = 9
+                row_distance = calculate_distance(row_ymin, row_ymax, angle)
+                distances.append(row_distance)
+            print("from inference. distances is", distances)
+
+            # check if class with highest confidence is shortest distance
+            short_distance = min(distances)
+            if distances[0] == short_distance:
+                # get output id
+                output_id = image_ids['%s' % max_class]
+                # only save results that have non-blank/non-bullseye class ID
+                if output_id == 0 or output_id == 99:
+                    pass
+                else:
+                    result.save(best_class=max_class, save_dir=run_directory)
+            else: # max confidence class is not closest to camera. Check if closest image is above threshold
+                print("class with highest confidence is not closest!")
+                # get confidence of class that's shortest distance to camera
+                short_index = distances.index(short_distance)
+                short_confidence = result_df['confidence'][short_index]
+                if short_confidence >= 0.8:
+                    short_class = result_df.loc[result_df['confidence'] == short_confidence, 'name'].iloc[0]
+                    print("short class", short_class)
+                    output_id = image_ids['%s' % short_class]
+                    # only save results that have non-blank/non-bullseye class ID
+                    if output_id == 0 or output_id == 99:
+                        pass
+                    else:
+                        result.save(best_class=short_class, save_dir=run_directory)
+                else: # closest image is not above threshold. Skip, don't return any output id or save
+                    pass
+            """
+            # uncomment the following if not using distances
+            # get output id
             output_id = image_ids['%s' % max_class]
             # only save results that have non-blank/non-bullseye class ID
             if output_id == 0 or output_id == 99:
                 pass
             else:
                 result.save(best_class=max_class, save_dir=run_directory)
+
         else:
             output_id = 99
     elif len(classes) == 1:
@@ -111,11 +150,14 @@ def run_inference(image, run_directory):
     print("from inference", output_id)
     # result.save() # only save results that have non-blank/non-bullseye class ID
 
-    # get output distance
+    # get output distance of target image
     ymax = result_df['ymax'][0]
     ymin = result_df['ymin'][0]
     angle = 9
     distance = calculate_distance(ymin, ymax, angle)
+    print("from inference. ymax is", ymax)
+    print("from inference. ymin is", ymin)
+    print("from inference. distance is", distance)
 
     outputs = [output_id, distance]
     return outputs

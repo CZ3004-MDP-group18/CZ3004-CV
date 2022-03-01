@@ -15,12 +15,12 @@ distance = ''
 
 # generates new run directory to save images in
 run_directory = 'runs/t8/run1' # comment everything but this line for testing
-# run_number = 1
-# while os.path.exists(run_directory):
-#     run_number += 1
-#     run_directory = 'runs/t8/run' + ('%i' % run_number)
-# print("new run directory", run_directory)
-# os.makedirs(run_directory)
+run_number = 1
+while os.path.exists(run_directory):
+    run_number += 1
+    run_directory = 'runs/t8/run' + ('%i' % run_number)
+print("new run directory", run_directory)
+os.makedirs(run_directory)
 
 @app.route("/health_check", methods=['GET', 'POST'])
 def healthCheck():
@@ -36,6 +36,7 @@ def test_method():
     if 'image' in request.files:
         photo = request.files['image']
         if photo.filename != '':
+            print("from server.py photo.filename is", photo.filename)
             photo.save(os.path.join(r'.', photo.filename))
             # process your img_arr here
             pil_image = Image.open(photo)
@@ -53,27 +54,28 @@ def test_method():
     # update number of images saved in run directory. Generate tile once complete
     num_captured_images = len([name for name in os.listdir(run_directory)])
     print("no of captured images so far: ", num_captured_images)
-    if num_captured_images == 5:
+    if num_captured_images >= 4:
         generate_images(run_directory)
 
     return output
 
 # --- For testing ---
 # retrieve images from run_directory
+# test_directory = 'runs/t8/for_testing'
 # input_images = []
-# for filename in glob.glob(run_directory+'/*.jpg'): #assuming jpg
+# for filename in glob.glob(test_directory+'/*.jpg'): #assuming jpg
 #     im=Image.open(filename)
 #     input_images.append(im)
+#     run_inference(im, run_directory)
 # print("run directory passing to inference: ", run_directory)
-# # run_inference(input_images[3], run_directory)
 #
 # num_captured_images = len([name for name in os.listdir(run_directory)])
 # print("no of captured images so far: ", num_captured_images)
-# if num_captured_images == 5:
+# if num_captured_images >= 4:
 #     generate_images(run_directory)
 
 def run_server_api():
-    app.run(host='192.168.3.13', port=4000)
+    app.run(host='192.168.3.12', port=4000)
 
 if __name__ == "__main__":
     run_server_api()
