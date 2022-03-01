@@ -585,7 +585,8 @@ class Detections:
         self.t = tuple((times[i + 1] - times[i]) * 1000 / self.n for i in range(3))  # timestamps (ms)
         self.s = shape  # inference BCHW shape
 
-    def display(self, pprint=False, show=False, save=False, crop=False, render=False, save_dir=Path('')):
+    # added new parameter best_class
+    def display(self, best_class, pprint=False, show=False, save=False, crop=False, render=False, save_dir=Path('')):
         crops = []
         for i, (im, pred) in enumerate(zip(self.imgs, self.pred)):
             s = f'image {i + 1}/{len(self.pred)}: {im.shape[0]}x{im.shape[1]} '  # string
@@ -596,13 +597,19 @@ class Detections:
                 if show or save or render or crop:
                     annotator = Annotator(im, example=str(self.names))
                     for *box, conf, cls in reversed(pred):  # xyxy, confidence, class
+                        # only draw bounding box for class with highest confidence
+                        # cls_float = cls.item()
+                        # print("debugging from common.py. Class float is ", cls_float)
+                        # conf_float = conf.item() # convert from tensor to float
+                        # print("debugging from common.py. Confidence float is ", conf_float)
                         label = f'{self.names[int(cls)]} {conf:.2f}'
-                        if crop:
-                            file = save_dir / 'crops' / self.names[int(cls)] / self.files[i] if save else None
-                            crops.append({'box': box, 'conf': conf, 'cls': cls, 'label': label,
-                                          'im': save_one_box(box, im, file=file, save=save)})
-                        else:  # all others
-                            annotator.box_label(box, label, color=colors(cls))
+                        if self.names[int(cls)] == best_class:
+                            if crop:
+                                file = save_dir / 'crops' / self.names[int(cls)] / self.files[i] if save else None
+                                crops.append({'box': box, 'conf': conf, 'cls': cls, 'label': label,
+                                              'im': save_one_box(box, im, file=file, save=save)})
+                            else:  # all others
+                                annotator.box_label(box, label, color=colors(cls))
                     im = annotator.im
             else:
                 s += '(no detections)'
@@ -633,9 +640,9 @@ class Detections:
         self.display(show=True)  # show results
 
     # default save_dir='runs/detect/exp', exist_ok=save_dir != 'runs/detect/exp
-    def save(self, save_dir='runs/detect/exp'):
+    def save(self, best_class, save_dir='runs/detect/exp'):
         save_dir = increment_path(save_dir, exist_ok=save_dir != 'runs/detect/exp', mkdir=True)  # increment save_dir
-        self.display(save=True, save_dir=save_dir)  # save results
+        self.display(save=True, save_dir=save_dir, best_class=best_class)  # save results
 
     # default save_dir='runs/detect/exp', exist_ok=save_dir != 'runs/detect/exp
     def crop(self, save=True, save_dir='runs/detect/exp'):

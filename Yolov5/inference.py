@@ -70,7 +70,7 @@ model = torch.hub.load(r"C:\Users\okapu\Desktop\1Uni\AY2021-22 Sem 2\3004 MDP\CZ
 def run_inference(image, run_directory):
     # try 'ultralytics/yolov5' as 1st argument if cannot run
     result = model(image)
-    result.print()
+    #result.print()
     result_df = result.pandas().xyxy[0]
     classes = result_df['name'].values.tolist()
     if len(classes) == 0:
@@ -92,7 +92,7 @@ def run_inference(image, run_directory):
             if output_id == 0 or output_id == 99:
                 pass
             else:
-                result.save(save_dir=run_directory)
+                result.save(best_class=max_class, save_dir=run_directory)
         else:
             output_id = 99
     elif len(classes) == 1:
@@ -105,7 +105,7 @@ def run_inference(image, run_directory):
             if output_id == 0 or output_id == 99:
                 pass
             else:
-                result.save(save_dir=run_directory)
+                result.save(best_class=class_name,save_dir=run_directory)
         else:
             output_id = 99
     print("from inference", output_id)
