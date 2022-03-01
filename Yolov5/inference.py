@@ -54,7 +54,7 @@ image_ids = {'square' : 0,
 
 # retrieve images from captured. Only for testing
 input_images = []
-for filename in glob.glob('captured/*.jpeg'): #assuming jpg
+for filename in glob.glob('captured/*.jpg'): #assuming jpg
     im=Image.open(filename)
     input_images.append(im)
 
@@ -89,7 +89,10 @@ def run_inference(image, run_directory):
             print("max class",max_class)
             output_id = image_ids['%s' % max_class]
             # only save results that have non-blank/non-bullseye class ID
-            result.save(save_dir=run_directory)
+            if output_id == 0 or output_id == 99:
+                pass
+            else:
+                result.save(save_dir=run_directory)
         else:
             output_id = 99
     elif len(classes) == 1:
@@ -99,7 +102,10 @@ def run_inference(image, run_directory):
             class_name = classes[0]
             output_id = image_ids['%s' % class_name]
             # only save results that have non-blank/non-bullseye class ID
-            result.save(save_dir=run_directory)
+            if output_id == 0 or output_id == 99:
+                pass
+            else:
+                result.save(save_dir=run_directory)
         else:
             output_id = 99
     print("from inference", output_id)
@@ -122,4 +128,4 @@ def calculate_distance(ymin, ymax, angle):
         return (oppcm/np.tan(angle*0.0175))
 
 # --- For Testing --- Saved images go to runs in same directory as this file
-# run_inference(input_images[0])
+# run_inference(input_images[0], run_directory='captured')
