@@ -1,5 +1,6 @@
 import logging
 import os
+import glob
 
 from PIL import Image
 from flask import Flask, request, jsonify
@@ -14,12 +15,12 @@ distance = ''
 
 # generates new run directory to save images in
 run_directory = 'runs/t8/run1' # comment everything but this line for testing
-run_number = 1
-while os.path.exists(run_directory):
-    run_number += 1
-    run_directory = 'runs/t8/run' + ('%i' % run_number)
-print("new run directory", run_directory)
-os.makedirs(run_directory)
+# run_number = 1
+# while os.path.exists(run_directory):
+#     run_number += 1
+#     run_directory = 'runs/t8/run' + ('%i' % run_number)
+# print("new run directory", run_directory)
+# os.makedirs(run_directory)
 
 @app.route("/health_check", methods=['GET', 'POST'])
 def healthCheck():
@@ -58,8 +59,13 @@ def test_method():
     return output
 
 # --- For testing ---
+# retrieve images from run_directory
+# input_images = []
+# for filename in glob.glob(run_directory+'/*.jpg'): #assuming jpg
+#     im=Image.open(filename)
+#     input_images.append(im)
 # print("run directory passing to inference: ", run_directory)
-# run_inference('test.jpg', run_directory)
+# # run_inference(input_images[3], run_directory)
 #
 # num_captured_images = len([name for name in os.listdir(run_directory)])
 # print("no of captured images so far: ", num_captured_images)

@@ -1,7 +1,7 @@
 """
-This file runs inference on input images stored in 'captured'
-and outputs labelled images in 'run'
-Returns image IDs.
+This file runs inference on input images stored in 'captured' (testing) or run
+and outputs labelled images in run directory
+Returns image IDs and distance
 """
 
 import torch
@@ -127,5 +127,5 @@ def calculate_distance(ymin, ymax, angle):
             angle = oppcm*(np.log(np.power(10,(oppcm*0.58))))
         return (oppcm/np.tan(angle*0.0175))
 
-# --- For Testing --- Saved images go to runs in same directory as this file
+# --- For Testing --- Saved images go to captured
 # run_inference(input_images[0], run_directory='captured')

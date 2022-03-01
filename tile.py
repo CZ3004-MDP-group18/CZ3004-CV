@@ -3,11 +3,6 @@ from tkinter import *
 import os
 from PIL import Image, ImageTk
 import glob
-#from server import run_directory
-
-# tile_directory = 'runs/t8/run1'
-# tile_directory = run_directory
-# root = Tk()
 
 def generate_images(tile_directory):
     root = Tk()
@@ -40,6 +35,5 @@ def generate_images(tile_directory):
     for i in range(num_captured_images):
         labelled_list.append(Label(root, image=photo_list[i]))
         labelled_list[-1].grid(row=i // nr, column=i % nc)
-        print(i)
 
     root.mainloop()
