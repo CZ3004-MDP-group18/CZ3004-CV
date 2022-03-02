@@ -52,12 +52,6 @@ image_ids = {'square' : 0,
 #                shell=True)
 # print("ran command shell")
 
-# retrieve images from captured. Only for testing
-input_images = []
-for filename in glob.glob('captured/*.jpeg'): #assuming jpg
-    im=Image.open(filename)
-    input_images.append(im)
-
 model = torch.hub.load(r"C:\Users\okapu\Desktop\1Uni\AY2021-22 Sem 2\3004 MDP\CZ3004-CV\pretrained\ultralytics_yolov5_master", 'custom',
                         r'C:\Users\okapu\Desktop\1Uni\AY2021-22 Sem 2\3004 MDP\CZ3004-CV\Yolov5\detection\yolov5\models\best_14feb.pt', source="local")
 
@@ -85,7 +79,7 @@ def run_inference(image, run_directory):
         if max_confidence >= 0.8:
             max_class = result_df.loc[result_df['confidence'] == max_confidence, 'name'].iloc[0]
             print("max class",max_class)
-            """
+
             # get distances of each class identified
             distances = []
             for i in range(len(classes)):
@@ -120,23 +114,33 @@ def run_inference(image, run_directory):
                         pass
                     else:
                         result.save(best_class=short_class, save_dir=run_directory)
-                else: # closest image is not above threshold. Skip, don't return any output id or save
-                    pass
-            """
+                else: # closest image is not above threshold.
+                    output_id = 99
+
+            distance = short_distance
+
             # uncomment the following if not using distances
             # get output id
-            output_id = image_ids['%s' % max_class]
-            # only save results that have non-blank/non-bullseye class ID
-            if output_id == 0 or output_id == 99:
-                pass
-            else:
-                result.save(best_class=max_class, save_dir=run_directory)
+            # output_id = image_ids['%s' % max_class]
+            # # only save results that have non-blank/non-bullseye class ID
+            # if output_id == 0 or output_id == 99:
+            #     pass
+            # else:
+            #     result.save(best_class=max_class, save_dir=run_directory)
 
         else:
             output_id = 99
     elif len(classes) == 1:
         max_confidence = max(result_df['confidence'].values.tolist())
         print("max confidence", max_confidence)
+        ymax = result_df['ymax'][0]
+        ymin = result_df['ymin'][0]
+        angle = 9
+        distance = calculate_distance(ymin, ymax, angle)
+        print("from inference. ymax is", ymax)
+        print("from inference. ymin is", ymin)
+        print("from inference. distance is", distance)
+
         if max_confidence >= 0.8:
             class_name = classes[0]
             output_id = image_ids['%s' % class_name]
@@ -150,13 +154,14 @@ def run_inference(image, run_directory):
     print("from inference", output_id)
     # result.save() # only save results that have non-blank/non-bullseye class ID
 
+    # uncomment the following if not using distances
     # get output distance of target image
-    ymax = result_df['ymax'][0]
-    ymin = result_df['ymin'][0]
-    angle = 9
-    distance = calculate_distance(ymin, ymax, angle)
-    print("from inference. ymax is", ymax)
-    print("from inference. ymin is", ymin)
+    # ymax = result_df['ymax'][0]
+    # ymin = result_df['ymin'][0]
+    # angle = 9
+    # distance = calculate_distance(ymin, ymax, angle)
+    # print("from inference. ymax is", ymax)
+    # print("from inference. ymin is", ymin)
     print("from inference. distance is", distance)
 
     outputs = [output_id, distance]
@@ -170,4 +175,9 @@ def calculate_distance(ymin, ymax, angle):
         return (oppcm/np.tan(angle*0.0175))
 
 # --- For Testing --- Saved images go to captured
-# run_inference(input_images[0], run_directory='captured')
+# retrieve images from captured. Only for testing
+# input_images = []
+# for filename in glob.glob('captured/*.jpeg'): #assuming jpg
+#     im=Image.open(filename)
+#     input_images.append(im)
+#     run_inference(im, run_directory='runs/test_output')
