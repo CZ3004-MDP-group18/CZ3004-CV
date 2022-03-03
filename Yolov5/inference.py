@@ -12,6 +12,9 @@ import glob
 import pandas
 import numpy as np
 
+output_id = 0
+distance = 0.0
+
 # dictionary of image IDs. Keys are IDs, values are bounding box labels
 image_ids = {'square' : 0,
             'blue1' : 11,
@@ -62,18 +65,29 @@ model = torch.hub.load(r"C:\Users\okapu\Desktop\1Uni\AY2021-22 Sem 2\3004 MDP\CZ
 
 # pass in 2 parameters - image + run directory
 def run_inference(image, run_directory):
+    global output_id
+    global distance
+
+    print("\n")
+
     # try 'ultralytics/yolov5' as 1st argument if cannot run
     result = model(image)
     #result.print()
     result_df = result.pandas().xyxy[0]
     result_df = result_df.sort_values(by=['confidence'], ascending=False).reset_index(drop=True)
+    print("======= NEW IMAGE ======================================================================")
     print(result_df)
     classes = result_df['name'].values.tolist()
 
     if len(classes) == 0:
+        print("=== 0 CLASSES IDENTIFIED ===")
         output_id = 99
-        return [99,0]
+        distance = 0
+        # only for debugging to see pic
+        result.save(best_class="blank", save_dir=run_directory)
+        # return [99,0]
     elif len(classes) >= 2:
+        print("=== MULTIPLE CLASSES IDENTIFIED ===")
         max_confidence = max(result_df['confidence'].values.tolist())
         print("max confidence", max_confidence)
         if max_confidence >= 0.8:
@@ -131,6 +145,7 @@ def run_inference(image, run_directory):
         else:
             output_id = 99
     elif len(classes) == 1:
+        print("=== ONE CLASS IDENTIFIED ===")
         max_confidence = max(result_df['confidence'].values.tolist())
         print("max confidence", max_confidence)
         ymax = result_df['ymax'][0]
@@ -146,12 +161,12 @@ def run_inference(image, run_directory):
             output_id = image_ids['%s' % class_name]
             # only save results that have non-blank/non-bullseye class ID
             if output_id == 0 or output_id == 99:
-                pass
+                result.save(best_class="ignore", save_dir=run_directory)
             else:
                 result.save(best_class=class_name,save_dir=run_directory)
         else:
             output_id = 99
-    print("from inference", output_id)
+    print("from inference. output id is", output_id)
     # result.save() # only save results that have non-blank/non-bullseye class ID
 
     # uncomment the following if not using distances
@@ -165,6 +180,7 @@ def run_inference(image, run_directory):
     print("from inference. distance is", distance)
 
     outputs = [output_id, distance]
+    print("from inference. outputs are", outputs)
     return outputs
 
 def calculate_distance(ymin, ymax, angle):

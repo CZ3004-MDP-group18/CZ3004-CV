@@ -1,6 +1,7 @@
 import logging
 import os
 import glob
+# import torchvision.transforms as T
 
 from PIL import Image
 from flask import Flask, request, jsonify
@@ -24,6 +25,7 @@ os.makedirs(run_directory)
 
 @app.route("/health_check", methods=['GET', 'POST'])
 def healthCheck():
+
     return jsonify(success=True)
 
 
@@ -64,9 +66,15 @@ def test_method():
 # test_directory = 'runs/t8/for_testing'
 # input_images = []
 # for filename in glob.glob(test_directory+'/*.jpg'): #assuming jpg
-#     im=Image.open(filename)
-#     input_images.append(im)
-#     run_inference(im, run_directory)
+#     pil_image=Image.open(filename)
+#     pil_image = T.functional.adjust_sharpness(img=pil_image, sharpness_factor=3.0)
+#     pil_image = T.functional.adjust_saturation(img=pil_image, saturation_factor=1.2)
+#     pil_image = T.functional.adjust_contrast(img=pil_image, contrast_factor=1.5)
+#     # pil_image = T.functional.adjust_gamma(img=pil_image, gamma=1.2)
+#     pil_image = T.functional.adjust_brightness(img=pil_image, brightness_factor=1.5)
+#
+#     input_images.append(pil_image)
+#     run_inference(pil_image, run_directory)
 # print("run directory passing to inference: ", run_directory)
 #
 # num_captured_images = len([name for name in os.listdir(run_directory)])
