@@ -88,6 +88,7 @@ def run_inference(image, run_directory):
         # return [99,0]
     elif len(classes) >= 2:
         print("=== MULTIPLE CLASSES IDENTIFIED ===")
+        print("no. of classes", len(classes))
         max_confidence = max(result_df['confidence'].values.tolist())
         print("max confidence", max_confidence)
         if max_confidence >= 0.8:
@@ -102,34 +103,60 @@ def run_inference(image, run_directory):
                 angle = 9
                 row_distance = calculate_distance(row_ymin, row_ymax, angle)
                 distances.append(row_distance)
-            print("from inference. distances is", distances)
+            print("from inference. distances is", distances) # DO NOT SORT DISTANCES HERE. RETAIN INDEXES
+            result_df['distance'] = distances
+            print(result_df)
 
             # check if class with highest confidence is shortest distance
             short_distance = min(distances)
-            if distances[0] == short_distance:
+            max_conf_distance = distances[0]
+            print("distance of highest confidence is", max_conf_distance)
+
+            if max_conf_distance == short_distance:
                 # get output id
                 output_id = image_ids['%s' % max_class]
                 # only save results that have non-blank/non-bullseye class ID
                 if output_id == 0 or output_id == 99:
-                    pass
+                    # pass
+                    result.save(best_class="ignore", save_dir=run_directory)
                 else:
                     result.save(best_class=max_class, save_dir=run_directory)
             else: # max confidence class is not closest to camera. Check if closest image is above threshold
                 print("class with highest confidence is not closest!")
                 # get confidence of class that's shortest distance to camera
-                short_index = distances.index(short_distance)
-                short_confidence = result_df['confidence'][short_index]
+                short_confidence = result_df.loc[result_df['distance'] == short_distance, 'confidence'].iloc[0]
+                print("short confidence", short_confidence)
                 if short_confidence >= 0.8:
                     short_class = result_df.loc[result_df['confidence'] == short_confidence, 'name'].iloc[0]
                     print("short class", short_class)
                     output_id = image_ids['%s' % short_class]
+
                     # only save results that have non-blank/non-bullseye class ID
                     if output_id == 0 or output_id == 99:
-                        pass
+                        # pass
+                        result.save(best_class="ignore", save_dir=run_directory)
                     else:
                         result.save(best_class=short_class, save_dir=run_directory)
                 else: # closest image is not above threshold.
                     output_id = 99
+                    # iterate through non-highest-confidence images further from closest
+                    # by dropping shortest class and finding new shortest
+                    for i in range(len(classes)) - 1:
+                        result_df.drop(result_df[result_df['distance'] == short_distance].index, inplace=True)
+                        short_distance = min(result_df['distance'].values.tolist())
+                        print("second shortest distance is", short_distance)
+                        short_confidence = result_df.loc[result_df['distance'] == short_distance, 'confidence'].iloc[0]
+                        if short_confidence >= 0.8:
+                            short_class = result_df.loc[result_df['confidence'] == short_confidence, 'name'].iloc[0]
+                            print("second shortest class", short_class)
+                            output_id = image_ids['%s' % short_class]
+                            if output_id == 0 or output_id == 99:
+                                # pass
+                                result.save(best_class="ignore", save_dir=run_directory)
+                            else:
+                                result.save(best_class=short_class, save_dir=run_directory)
+                        else:
+                            continue
 
             distance = short_distance
 

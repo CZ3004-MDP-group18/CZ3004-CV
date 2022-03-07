@@ -632,7 +632,7 @@ class Detections:
                     i += 1
                     f = str(i) + '.jpg'
                 im.save(save_dir / f)  # save
-                print("saved to", (save_dir / f))
+                print("from common.py. saved to", (save_dir / f))
                 if i == self.n - 1:
                     LOGGER.info(f"Saved {self.n} image{'s' * (self.n > 1)} to {colorstr('bold', save_dir)}")
             if render:
