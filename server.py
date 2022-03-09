@@ -72,22 +72,8 @@ def test_method():
 # input_images = []
 # for filename in glob.glob(test_directory+'/*.jpg'): #assuming jpg
 #     pil_image=Image.open(filename)
-#     open_cv_image = cv2.imread(filename)
-#     clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
-#     modified = open_cv_image.astype('uint8')
-#     print(type(modified))
-#     modified = clahe.apply(open_cv_image)
-#     pil_modified=Image.fromarray(modified)
-#     input_images.append(pil_modified)
-#     run_inference(pil_modified, run_directory)
-    # pil_image = T.functional.adjust_sharpness(img=pil_image, sharpness_factor=3.0)
-    # pil_image = T.functional.adjust_saturation(img=pil_image, saturation_factor=1.2)
-    # pil_image = T.functional.adjust_contrast(img=pil_image, contrast_factor=1.5)
-    # # pil_image = T.functional.adjust_gamma(img=pil_image, gamma=1.2)
-    # pil_image = T.functional.adjust_brightness(img=pil_image, brightness_factor=1.5)
-
-    # input_images.append(pil_image)
-    # run_inference(pil_image, run_directory)
+#     input_images.append(pil_image)
+#     run_inference(pil_image, run_directory)
 # print("run directory passing to inference: ", run_directory)
 #
 # num_captured_images = len([name for name in os.listdir(run_directory)])

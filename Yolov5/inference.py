@@ -56,8 +56,12 @@ image_ids = {'square' : 0,
 #                shell=True)
 # print("ran command shell")
 
-model = torch.hub.load(r"C:\Users\okapu\Desktop\1Uni\AY2021-22 Sem 2\3004 MDP\CZ3004-CV\pretrained\ultralytics_yolov5_master", 'custom',
-                        r'C:\Users\okapu\Desktop\1Uni\AY2021-22 Sem 2\3004 MDP\CZ3004-CV\Yolov5\detection\yolov5\models\best_14feb.pt', source="local")
+# model = torch.hub.load(r"C:\Users\okapu\Desktop\1Uni\AY2021-22 Sem 2\3004 MDP\CZ3004-CV\pretrained\ultralytics_yolov5_master", 'custom',
+#                         r'C:\Users\okapu\Desktop\1Uni\AY2021-22 Sem 2\3004 MDP\CZ3004-CV\Yolov5\detection\yolov5\models\best_14feb.pt', source="local")
+
+model = torch.hub.load(r"pretrained\ultralytics_yolov5_master", 'custom',
+                        r"Yolov5\detection\yolov5\models\best_14feb.pt", source="local")
+
 
 # output ID meanings
 # 0 - bullseye
@@ -220,8 +224,8 @@ def calculate_distance(ymin, ymax, angle):
 
 # --- For Testing --- Saved images go to captured
 # retrieve images from captured. Only for testing
-input_images = []
-for filename in glob.glob('captured/*.jpg'): #assuming jpg
-    im=Image.open(filename)
-    input_images.append(im)
-    run_inference(im, run_directory='runs/test_output')
+# input_images = []
+# for filename in glob.glob('captured/*.jpg'): #assuming jpg
+#     im=Image.open(filename)
+#     input_images.append(im)
+#     run_inference(im, run_directory='runs/test_output')
