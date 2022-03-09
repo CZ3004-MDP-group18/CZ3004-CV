@@ -17,7 +17,7 @@ target_id = ''
 distance = ''
 
 # ranges from 4 to 8
-number_of_targets = 4
+number_of_targets = 6
 
 # generates new run directory to save images in
 run_directory = 'runs/t8/run1' # comment everything but this line for testing

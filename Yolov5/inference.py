@@ -161,6 +161,7 @@ def run_inference(image, run_directory):
                             else:
                                 result.save(best_class=short_class, save_dir=run_directory)
                         else:
+                            result.save(best_class="ignore", save_dir=run_directory)
                             continue
 
             distance = short_distance
@@ -176,6 +177,7 @@ def run_inference(image, run_directory):
 
         else:
             output_id = 99
+            result.save(best_class="ignore", save_dir=run_directory)
     elif len(classes) == 1:
         print("=== ONE CLASS IDENTIFIED ===")
         max_confidence = max(result_df['confidence'].values.tolist())
@@ -198,6 +200,7 @@ def run_inference(image, run_directory):
                 result.save(best_class=class_name,save_dir=run_directory)
         else:
             output_id = 99
+            result.save(best_class="ignore", save_dir=run_directory)
     print("from inference. output id is", output_id)
     # result.save() # only save results that have non-blank/non-bullseye class ID
 
