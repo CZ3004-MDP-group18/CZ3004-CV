@@ -14,6 +14,7 @@ import numpy as np
 
 output_id = 0
 distance = 0.0
+confidence_level = 0.5
 
 # dictionary of image IDs. Keys are IDs, values are bounding box labels
 image_ids = {'square' : 0,
@@ -91,7 +92,7 @@ def run_inference(image, run_directory):
         print("no. of classes", len(classes))
         max_confidence = max(result_df['confidence'].values.tolist())
         print("max confidence", max_confidence)
-        if max_confidence >= 0.8:
+        if max_confidence >= confidence_level:
             max_class = result_df.loc[result_df['confidence'] == max_confidence, 'name'].iloc[0]
             print("max class",max_class)
 
@@ -126,7 +127,7 @@ def run_inference(image, run_directory):
                 # get confidence of class that's shortest distance to camera
                 short_confidence = result_df.loc[result_df['distance'] == short_distance, 'confidence'].iloc[0]
                 print("short confidence", short_confidence)
-                if short_confidence >= 0.8:
+                if short_confidence >= confidence_level:
                     short_class = result_df.loc[result_df['confidence'] == short_confidence, 'name'].iloc[0]
                     print("short class", short_class)
                     output_id = image_ids['%s' % short_class]
@@ -141,12 +142,12 @@ def run_inference(image, run_directory):
                     output_id = 99
                     # iterate through non-highest-confidence images further from closest
                     # by dropping shortest class and finding new shortest
-                    for i in range(len(classes)) - 1:
+                    for i in range(len(classes) - 1):
                         result_df.drop(result_df[result_df['distance'] == short_distance].index, inplace=True)
                         short_distance = min(result_df['distance'].values.tolist())
                         print("second shortest distance is", short_distance)
                         short_confidence = result_df.loc[result_df['distance'] == short_distance, 'confidence'].iloc[0]
-                        if short_confidence >= 0.8:
+                        if short_confidence >= confidence_level:
                             short_class = result_df.loc[result_df['confidence'] == short_confidence, 'name'].iloc[0]
                             print("second shortest class", short_class)
                             output_id = image_ids['%s' % short_class]
@@ -183,7 +184,7 @@ def run_inference(image, run_directory):
         print("from inference. ymin is", ymin)
         print("from inference. distance is", distance)
 
-        if max_confidence >= 0.8:
+        if max_confidence >= confidence_level:
             class_name = classes[0]
             output_id = image_ids['%s' % class_name]
             # only save results that have non-blank/non-bullseye class ID
@@ -219,8 +220,8 @@ def calculate_distance(ymin, ymax, angle):
 
 # --- For Testing --- Saved images go to captured
 # retrieve images from captured. Only for testing
-# input_images = []
-# for filename in glob.glob('captured/*.jpeg'): #assuming jpg
-#     im=Image.open(filename)
-#     input_images.append(im)
-#     run_inference(im, run_directory='runs/test_output')
+input_images = []
+for filename in glob.glob('captured/*.jpg'): #assuming jpg
+    im=Image.open(filename)
+    input_images.append(im)
+    run_inference(im, run_directory='runs/test_output')

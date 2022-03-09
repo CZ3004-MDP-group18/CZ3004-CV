@@ -2,6 +2,8 @@ import logging
 import os
 import glob
 # import torchvision.transforms as T
+import cv2
+import numpy
 
 from PIL import Image
 from flask import Flask, request, jsonify
@@ -13,6 +15,9 @@ app = Flask(__name__)
 app.logger.setLevel(logging.DEBUG)
 target_id = ''
 distance = ''
+
+# ranges from 4 to 8
+number_of_targets = 4
 
 # generates new run directory to save images in
 run_directory = 'runs/t8/run1' # comment everything but this line for testing
@@ -56,31 +61,39 @@ def test_method():
     # update number of images saved in run directory. Generate tile once complete
     num_captured_images = len([name for name in os.listdir(run_directory)])
     print("no of captured images so far: ", num_captured_images)
-    if num_captured_images >= 4:
+    if num_captured_images >= number_of_targets:
         generate_images(run_directory)
 
     return output
 
 # --- For testing ---
 # retrieve images from run_directory
-test_directory = 'runs/t8/for_testing'
-input_images = []
-for filename in glob.glob(test_directory+'/*.jpg'): #assuming jpg
-    pil_image=Image.open(filename)
+# test_directory = 'runs/t8/for_testing'
+# input_images = []
+# for filename in glob.glob(test_directory+'/*.jpg'): #assuming jpg
+#     pil_image=Image.open(filename)
+#     open_cv_image = cv2.imread(filename)
+#     clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+#     modified = open_cv_image.astype('uint8')
+#     print(type(modified))
+#     modified = clahe.apply(open_cv_image)
+#     pil_modified=Image.fromarray(modified)
+#     input_images.append(pil_modified)
+#     run_inference(pil_modified, run_directory)
     # pil_image = T.functional.adjust_sharpness(img=pil_image, sharpness_factor=3.0)
     # pil_image = T.functional.adjust_saturation(img=pil_image, saturation_factor=1.2)
     # pil_image = T.functional.adjust_contrast(img=pil_image, contrast_factor=1.5)
     # # pil_image = T.functional.adjust_gamma(img=pil_image, gamma=1.2)
     # pil_image = T.functional.adjust_brightness(img=pil_image, brightness_factor=1.5)
 
-    input_images.append(pil_image)
-    run_inference(pil_image, run_directory)
-print("run directory passing to inference: ", run_directory)
-
-num_captured_images = len([name for name in os.listdir(run_directory)])
-print("no of captured images so far: ", num_captured_images)
-if num_captured_images >= 4:
-    generate_images(run_directory)
+    # input_images.append(pil_image)
+    # run_inference(pil_image, run_directory)
+# print("run directory passing to inference: ", run_directory)
+#
+# num_captured_images = len([name for name in os.listdir(run_directory)])
+# print("no of captured images so far: ", num_captured_images)
+# if num_captured_images >= number_of_targets:
+#     generate_images(run_directory)
 
 def run_server_api():
     app.run(host='192.168.3.12', port=4000)
