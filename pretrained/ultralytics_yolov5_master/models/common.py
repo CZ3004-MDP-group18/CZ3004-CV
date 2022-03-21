@@ -587,17 +587,16 @@ class Detections:
         self.s = shape  # inference BCHW shape
 
     # added new parameter best_class
-    def display(self, best_class, pprint=False, show=False, save=False, crop=False, render=False, save_dir=Path('')):
+    def display(self, best_class, pprint=False, show=False, save=False, crop=False, render=False, save_dir=Path(''),
+                is_testing=False):
         crops = []
-        print("self.files are", self.files)
-        print("saving directory is", save_dir)
         for i, (im, pred) in enumerate(zip(self.imgs, self.pred)):
             s = f'image {i + 1}/{len(self.pred)}: {im.shape[0]}x{im.shape[1]} '  # string
             if pred.shape[0]:
                 for c in pred[:, -1].unique():
                     n = (pred[:, -1] == c).sum()  # detections per class
                     s += f"{n} {self.names[int(c)]}{'s' * (n > 1)}, "  # add to string
-                if show or save or render or crop:
+                if is_testing == False and (show or save or render or crop):
                     annotator = Annotator(im, example=str(self.names))
                     for *box, conf, cls in reversed(pred):  # xyxy, confidence, class
                         # only draw bounding box for class with highest confidence
@@ -605,6 +604,9 @@ class Detections:
                         # print("debugging from common.py. Class float is ", cls_float)
                         # conf_float = conf.item() # convert from tensor to float
                         # print("debugging from common.py. Confidence float is ", conf_float)
+                        # print("debugging from common.py. self.names[int(cls)] is", self.names[int(cls)])
+                        # print("debugging from common.py. best_class is", best_class)
+                        # print("debugging from common.py. save directory is", save_dir)
                         label = f'{self.names[int(cls)]} {conf:.2f}'
                         if self.names[int(cls)] == best_class:
                             if crop:
@@ -651,9 +653,12 @@ class Detections:
         self.display(show=True)  # show results
 
     # default save_dir='runs/detect/exp', exist_ok=save_dir != 'runs/detect/exp
-    def save(self, best_class, save_dir='runs/detect/exp'):
+    def save(self, best_class, save_dir='runs/detect/exp', is_testing=False):
         save_dir = increment_path(save_dir, exist_ok=save_dir != 'runs/detect/exp', mkdir=True)  # increment save_dir
-        self.display(save=True, save_dir=save_dir, best_class=best_class)  # save results
+        if is_testing == True:
+            self.display(save=True, save_dir=save_dir, best_class=best_class, is_testing=is_testing) # save just raw image
+        else:
+            self.display(save=True, save_dir=save_dir, best_class=best_class)  # save results normally
 
     # default save_dir='runs/detect/exp', exist_ok=save_dir != 'runs/detect/exp
     def crop(self, save=True, save_dir='runs/detect/exp'):

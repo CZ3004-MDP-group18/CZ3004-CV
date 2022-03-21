@@ -16,15 +16,15 @@ app.logger.setLevel(logging.DEBUG)
 target_id = ''
 distance = ''
 
-# ranges from 4 to 8
-number_of_targets = 6
+# ranges from 4 to 8.
+number_of_targets = 5
 
 # generates new run directory to save images in
-run_directory = 'runs/t8/run1' # comment everything but this line for testing
+run_directory = 'runs/t9/run1' # comment everything but this line for testing
 run_number = 1
 while os.path.exists(run_directory):
     run_number += 1
-    run_directory = 'runs/t8/run' + ('%i' % run_number)
+    run_directory = 'runs/t9/run' + ('%i' % run_number)
 print("new run directory", run_directory)
 os.makedirs(run_directory)
 
@@ -59,16 +59,16 @@ def test_method():
     print("from server", output)
 
     # update number of images saved in run directory. Generate tile once complete
-    num_captured_images = len([name for name in os.listdir(run_directory)])
-    print("no of captured images so far: ", num_captured_images)
-    if num_captured_images >= number_of_targets:
-        generate_images(run_directory)
+    # num_captured_images = len([name for name in os.listdir(run_directory)])
+    # print("no of captured images so far: ", num_captured_images)
+    # if num_captured_images >= number_of_targets:
+    #     generate_images(run_directory)
 
     return output
 
 # --- For testing ---
 # retrieve images from run_directory
-# test_directory = 'runs/t8/for_testing'
+# test_directory = 'runs/for_testing'
 # input_images = []
 # for filename in glob.glob(test_directory+'/*.jpg'): #assuming jpg
 #     pil_image=Image.open(filename)
@@ -80,9 +80,9 @@ def test_method():
 # print("no of captured images so far: ", num_captured_images)
 # if num_captured_images >= number_of_targets:
 #     generate_images(run_directory)
-
-def run_server_api():
-    app.run(host='192.168.3.12', port=4000)
-
-if __name__ == "__main__":
-    run_server_api()
+#
+# def run_server_api():
+#     app.run(host='192.168.3.13', port=4000)
+#
+# if __name__ == "__main__":
+#     run_server_api()

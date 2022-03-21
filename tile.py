@@ -7,7 +7,7 @@ import glob
 def generate_images(tile_directory):
     root = Tk()
     root.lift()
-    # root.attributes('-topmost', True) # remains in front of other windows
+    root.attributes('-topmost', True) # remains in front of other windows
 
     # specify where window appears
     x = 20
